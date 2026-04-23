@@ -1,0 +1,17 @@
+{
+  "name": "IguaNews - Notícias de Iguatama",
+  "short_name": "IguaNews",
+  "description": "Seu portal de notícias, curiosidades e histórias sobre Iguatama.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAFAF7",
+  "theme_color": "#1B5E3B",
+  "orientation": "portrait-primary",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "screenshots": [],
+  "categories": ["news"]
+}
