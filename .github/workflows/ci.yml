@@ -32,10 +32,20 @@ jobs:
 
       # ── 4. Rodar testes ────────────────────────────────────
       #
+      # MONGO_URI e MONGO_URI_TEST: ambos apontam para o mesmo secret.
+      # Os arquivos de teste usam:
+      #   const MONGO_URI = process.env.MONGO_URI_TEST || process.env.MONGO_URI
+      # Por isso MONGO_URI_TEST deve ser exposto explicitamente como env var,
+      # caso contrário process.env.MONGO_URI_TEST seria undefined no runner.
+      #
+      # ATENÇÃO — MongoDB Atlas: o cluster de testes deve permitir conexões
+      # de qualquer IP (0.0.0.0/0) em Network Access, pois o GitHub Actions
+      # usa IPs dinâmicos que variam a cada execução.
+      #
       # CLOUDINARY_*: valores fictícios — testes não fazem upload real.
-      # O env.js aceita qualquer string quando NODE_ENV=test (campo opcional).
+      # O env.js aceita qualquer string quando NODE_ENV=test.
       # Sem essas variáveis o Zod chamava process.exit(1) e derrubava
-      # cada worker do Jest antes do teste começar (causa do erro anterior).
+      # cada worker do Jest antes do teste começar.
       #
       - name: Rodar testes
         working-directory: backend
@@ -43,6 +53,7 @@ jobs:
           NODE_ENV: test
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           MONGO_URI: ${{ secrets.MONGO_URI_TEST }}
+          MONGO_URI_TEST: ${{ secrets.MONGO_URI_TEST }}
           CLOUDINARY_CLOUD_NAME: test-placeholder
           CLOUDINARY_API_KEY: test-placeholder
           CLOUDINARY_API_SECRET: test-placeholder
