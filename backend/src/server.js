@@ -192,6 +192,13 @@ async function iniciar() {
   }
 }
 
-iniciar()
-
+// Exporta app ANTES de iniciar o servidor.
+// Quando os testes importam este módulo, eles recebem o Express app
+// sem disparar o app.listen() — evita EADDRINUSE com múltiplos workers Jest.
 export default app
+
+// Só inicia o servidor se NÃO estiver em ambiente de teste.
+// Em teste, cada arquivo de teste conecta ao MongoDB manualmente no beforeAll().
+if (process.env.NODE_ENV !== 'test') {
+  iniciar()
+}
