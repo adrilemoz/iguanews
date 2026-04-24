@@ -31,12 +31,21 @@ jobs:
         run: npm ci
 
       # ── 4. Rodar testes ────────────────────────────────────
+      #
+      # CLOUDINARY_*: valores fictícios — testes não fazem upload real.
+      # O env.js aceita qualquer string quando NODE_ENV=test (campo opcional).
+      # Sem essas variáveis o Zod chamava process.exit(1) e derrubava
+      # cada worker do Jest antes do teste começar (causa do erro anterior).
+      #
       - name: Rodar testes
         working-directory: backend
         env:
           NODE_ENV: test
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           MONGO_URI: ${{ secrets.MONGO_URI_TEST }}
+          CLOUDINARY_CLOUD_NAME: test-placeholder
+          CLOUDINARY_API_KEY: test-placeholder
+          CLOUDINARY_API_SECRET: test-placeholder
         run: npm test
 
   # ────────────────────────────────────────────────────────────
