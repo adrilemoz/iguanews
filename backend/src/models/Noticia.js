@@ -111,7 +111,7 @@ const noticiaSchema = new mongoose.Schema(
      */
     status: {
       type:    String,
-      enum:    ['rascunho', 'publicado', 'arquivado'],
+      enum:    ['rascunho', 'revisao', 'publicado', 'arquivado'],
       default: 'rascunho',
       index:   true,
     },

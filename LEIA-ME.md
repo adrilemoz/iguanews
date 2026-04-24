@@ -1,123 +1,150 @@
-# 📦 IguaNews — Instalador Web (estilo WordPress)
+# 📋 IguaNews — Changelog de Sprints
 
-## O que foi alterado / criado
+Histórico de refatorações e funcionalidades entregues por sprint.  
+Para instruções de instalação consulte o [`README.md`](./README.md).
+
+---
+
+## Sprint 1 — Qualidade de código & Bugs críticos
+
+**Foco:** eliminar duplicação de código no frontend admin e corrigir três bugs silenciosos.
+
+### 🐛 Bugs corrigidos
+
+| ID | Arquivo | Descrição |
+|----|---------|-----------|
+| B1 | `frontend/src/App.jsx` | Rota `/admin/categorias` renderizava `<AdminNoticias>` em vez de `<AdminCategorias>`; import lazy adicionado |
+| B2 | `backend/src/models/Noticia.js` | Enum de `status` não incluía `'revisao'`; rotas e frontend já usavam esse valor |
+| B3 | `frontend/src/App.jsx` | `<AdminSEO>` não estava envolto em `<AdminSuspense>`, causando crash no carregamento lazy |
+
+### 🏗️ Novos arquivos
+
+| Arquivo | Descrição |
+|---------|-----------|
+| `frontend/src/themes/tokens.js` | Fonte única de tokens de cor (CSS vars + fallbacks hardcoded) |
+| `frontend/src/components/admin/ui/AdminIcon.jsx` | Biblioteca SVG centralizada — 50+ ícones nomeados |
+| `frontend/src/components/admin/ui/ForcaSenha.jsx` | Indicador de força de senha unificado (5 níveis) |
+| `frontend/src/utils/permissions.js` | `GRUPOS_PERMISSOES` — fonte única para AdminUsuarios e futuros consumidores |
+| `frontend/src/styles/base.css` | Tailwind + reset global (extraído de `index.css`) |
+| `frontend/src/styles/public.css` | Componentes do site público — `.btn`, `.card`, `.prose-news`… |
+| `frontend/src/styles/admin.css` | Design system do painel — `.admin-shell`, `.adm-*` |
+
+### ✏️ Arquivos modificados
+
+| Arquivo | O que mudou |
+|---------|-------------|
+| `frontend/src/index.css` | Agora contém apenas 3 `@import` apontando para `styles/` |
+| `frontend/src/App.jsx` | Bugs B1 e B3 corrigidos |
+| `frontend/src/pages/admin/AdminDashboard.jsx` | `const C` e `const Ico` substituídos por imports de `tokens.js` e `AdminIcon` |
+| `frontend/src/pages/admin/AdminNoticias.jsx` | Idem |
+| `frontend/src/pages/admin/AdminSEO.jsx` | Idem |
+| `frontend/src/pages/admin/AdminSetup.jsx` | Idem; `calcForca`/`BarraForca` removidos — usa `ForcaSenha` importado |
+| `frontend/src/pages/admin/AdminInfraestrutura.jsx` | Idem; `Spin` local substituído por `AdminIcon name="spinSm"` |
+| `frontend/src/pages/admin/AdminUsuarios.jsx` | `ForcaSenha` local e `GRUPOS_PERMISSOES` removidos — usa imports centralizados |
+| `backend/src/models/Noticia.js` | Bug B2 corrigido — `'revisao'` adicionado ao enum |
+
+### 🗑️ Arquivos removidos
+
+| Arquivo | Motivo |
+|---------|--------|
+| `backend/src/routes/setup.js.patch` | Nota de uma linha sem conteúdo útil; rota já existia |
+| `frontend/src/services/setupService.patch.js` | Todos os métodos já estavam integrados em `api.js` com mais funcionalidades |
+
+---
+
+## Pré-Sprint 1 — Instalador Web (estilo WordPress)
+
+Funcionalidade entregue antes do Sprint 1. Documentada aqui para referência.
+
+### Arquivos entregues
 
 | Arquivo | Ação | Descrição |
-|---|---|---|
-| `backend/src/routes/setup.js` | **Substituir** | Rota de setup com suporte a seed e reset via HTTP |
-| `frontend/src/pages/admin/AdminSetup.jsx` | **Substituir** | Tela de instalação completa (4 fases) |
-| `frontend/src/services/setupService.patch.js` | **Patch** | Métodos novos no `setupService` do `api.js` |
+|---------|------|-----------|
+| `backend/src/routes/setup.js` | Substituído | Rota de setup com seed e reset via HTTP |
+| `frontend/src/pages/admin/AdminSetup.jsx` | Substituído | Tela de instalação completa (4 fases) |
 
----
-
-## Como aplicar
-
-### 1. Backend — substituir `setup.js`
-
-```bash
-cp backend/src/routes/setup.js  SEU_PROJETO/backend/src/routes/setup.js
-```
-
-### 2. Frontend — substituir `AdminSetup.jsx`
-
-```bash
-cp frontend/src/pages/admin/AdminSetup.jsx  SEU_PROJETO/frontend/src/pages/admin/AdminSetup.jsx
-```
-
-### 3. Frontend — atualizar `api.js`
-
-No arquivo `frontend/src/services/api.js`, localize o objeto `setupService` e substitua pelo conteúdo de `setupService.patch.js`.
-
----
-
-## Rotas do backend (novas/alteradas)
+### Rotas do instalador
 
 | Método | Caminho | Auth | Descrição |
-|---|---|---|---|
+|--------|---------|------|-----------|
 | `GET` | `/api/setup/status` | Não | Estado do banco: vazio, instalado, contagens |
-| `POST` | `/api/setup` | Não | **Instalação inicial** (só funciona com banco vazio) |
-| `POST` | `/api/setup/seed` | ✅ Sim | Importar dados de exemplo |
-| `POST` | `/api/setup/reset-db` | ✅ Sim | Resetar banco (requer confirmação) |
+| `POST` | `/api/setup` | Não | Instalação inicial (banco vazio) |
+| `POST` | `/api/setup/seed` | ✅ | Importar dados de exemplo |
+| `POST` | `/api/setup/reset-db` | ✅ | Resetar banco (requer confirmação) |
+| `GET` | `/api/setup/env-config` | ✅ | Ler variáveis de ambiente editáveis |
+| `POST` | `/api/setup/env-config` | ✅ | Salvar variáveis de ambiente |
+| `POST` | `/api/setup/test-mongo` | ✅ | Testar conexão MongoDB |
+| `POST` | `/api/setup/test-cloudinary` | ✅ | Testar conexão Cloudinary |
+| `POST` | `/api/setup/desativar` | ✅ | Desativar o modo setup |
 
----
-
-## Fluxo do instalador
+### Fluxo resumido
 
 ```
-Acessa /admin/setup
-       │
-       ▼
+/admin/setup
+    │
+    ▼
 GET /api/setup/status
-       │
-  setup_needed?
-  ┌────┴────┐
-  Sim       Não
-  │         │
-  ▼         ▼
-Tela de   Painel de
-Instalação gerenciamento
-           (banco / seed / reset)
-  │
-  ▼
-Formulário:
-  • Nome do site
-  • Nome do admin
-  • Email / Senha
-  • ☑ Importar dados de exemplo
-  │
-  ▼
-POST /api/setup
-  → Cria perfis (Superadmin, Admin, Editor, Jornalista, Visualizador)
-  → Cria usuário superadmin
-  → (opcional) Importa seed: categorias, notícias, eventos, ônibus
-  │
-  ▼
-Tela de sucesso → redireciona /login (5s)
+    │
+banco vazio?
+┌───┴───┐
+Sim     Não
+│       │
+▼       ▼
+Tela de  Painel de gerenciamento
+instalação (banco / seed / reset / env)
 ```
 
----
+### Dados importados pelo seed
 
-## Painel pós-instalação (`/admin/setup`)
-
-Após instalar, ao acessar `/admin/setup` o sistema detecta que já está configurado
-e exibe o **painel de gerenciamento de banco**:
-
-- **Estado atual**: contagem de usuários, notícias, categorias, eventos, ônibus
-- **Importar seed**: escolhe nome do site + opção de limpar antes
-- **Reset do banco**: apaga tudo (com opção de manter usuários); requer digitar `CONFIRMAR_RESET`
+- 10 categorias, 5 notícias de exemplo, 3 notícias externas
+- 2 linhas de ônibus com horários, 3 eventos futuros
+- Configuração da home, 4 módulos da home
 
 ---
 
-## Dados importados pelo seed
+## Sprint 2 — Extração de hooks
 
-- **10 categorias**: Política, Saúde, Educação, Esportes, Cultura, Economia, Segurança, Meio Ambiente, Curiosidades, História
-- **5 notícias** de exemplo (adaptadas ao nome do site)
-- **3 notícias externas** (G1, UOL, BBC)
-- **2 linhas de ônibus** com horários
-- **3 eventos** futuros
-- **Configuração da home** (nome do site, cores)
-- **4 módulos da home**
+**Foco:** mover lógica de fetch/CRUD para fora dos componentes, deixando apenas estado de UI neles.
+
+### 🏗️ Novos arquivos
+
+| Arquivo | Extraído de | O que encapsula |
+|---------|-------------|-----------------|
+| `frontend/src/hooks/useUsuarios.js` | `AdminUsuarios.jsx` | `usuarios`, `perfis`, `loading`, `busca`, CRUD completo, `usuariosFiltrados` |
+| `frontend/src/hooks/useEventos.js` | `AdminEventos.jsx` | `eventos`, `loading`, `salvarEvento`, `excluirEvento`, `eventosDatas`, `futuros`, `passados` |
+| `frontend/src/hooks/useRss.js` | `AdminRssImport.jsx` | `fontes`, `padrao`, `categorias`, todos os loading states, `adicionarPadrao`, `salvarFonte`, `excluirFonte`, `importarFonte`, `importarTodas`, `temFontesAtivas` |
+
+### ✏️ Arquivos modificados
+
+| Arquivo | O que mudou |
+|---------|-------------|
+| `frontend/src/pages/admin/AdminUsuarios.jsx` | Fetch/CRUD removido; usa `useUsuarios()`. Estado de UI restante: `modalUsr`, `modalPrf`, `excluindo` |
+| `frontend/src/pages/admin/AdminEventos.jsx` | Fetch/CRUD removido; usa `useEventos()`. Estado de UI restante: `editando`, `editEvento`, `confirm` |
+| `frontend/src/pages/admin/AdminRssImport.jsx` | Fetch/CRUD removido; usa `useRss()`. Estado de UI restante: `modal` (abertura do modal de edição) |
+
+### 🧹 Imports removidos dos componentes
+
+| Componente | Import removido |
+|-----------|-----------------|
+| `AdminEventos.jsx` | `useEffect`, `eventosService` |
+| `AdminRssImport.jsx` | `useEffect`, `useCallback`, `categoriasService` |
 
 ---
 
-## Por que o seed antigo rodava no `npm install`?
+## Sprint 3 — Backend: controller + service + limpeza
 
-O `seed.js` original era executado via `"postinstall"` no `package.json`.
-Isso causava limpeza automática do banco a cada `npm install`, o que é indesejável em produção.
+**Foco:** extrair a lógica de negócio de `routes/noticias.js` para camadas dedicadas e eliminar arquivo obsoleto.
 
-**Com o novo instalador**, o seed só roda quando você clica em "Importar dados de exemplo"
-na interface web — sem risco de apagar dados existentes por acidente.
+### 🏗️ Novos arquivos
 
-> Para remover o seed do postinstall, edite `backend/package.json` e remova
-> a linha `"postinstall": "node seed.js"` (ou similar) dos `scripts`.
+`backend/src/services/noticiaService.js` centraliza toda a lógica pura do domínio de notícias — sem dependência de `req`/`res`. Exporta: `TRANSICOES_VALIDAS`, `validarTransicao`, `popular`, `popularUm`, `buildFiltro` (monta o filtro MongoDB a partir dos query params, resolvendo slugs de categorias e regras de visibilidade por status), `buildSort` e `extrairCampos`.
 
----
+`backend/src/controllers/noticiasController.js` contém os 9 handlers HTTP extraídos das rotas: `listar`, `contagemStatus`, `buscarUm`, `criar`, `atualizar`, `mudarStatus`, `excluir`, `adicionarGaleria` e `removerGaleria`. Cada função recebe `(req, res, next)` e delega a lógica ao service — pode ser testada isoladamente com mocks.
 
-## Caminho direto para o instalador
+### ✏️ Arquivos modificados
 
-```
-http://localhost:5173/admin/setup
-```
+`backend/src/routes/noticias.js` passou de 283 linhas para 83. Agora contém apenas imports e declarações de rota, sem nenhuma lógica inline.
 
-Se o banco estiver vazio → tela de instalação  
-Se já instalado → painel de banco (requer login ativo na sessão)
+### 🗑️ Arquivos removidos
+
+`backend/src/routes/rssImport.js` — marcado como `⚠️ ARQUIVO DEPRECADO` desde a criação, nunca montado em `server.js`, com todas as suas funcionalidades já migradas para `rssAdmin.js` e `services/rssImporter.js`.

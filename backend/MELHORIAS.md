@@ -252,3 +252,37 @@ Permite enviar um arquivo `.json` (exportado previamente via "Download") de volt
 - `frontend/src/pages/admin/AdminBackup.jsx` — seção "Importar backup" com área de seleção de arquivo (drag-friendly click zone), campo de descrição, botão de importar e badge "IMPORTADO" na listagem
 
 **Dependência:** `multer` (já presente no projeto).
+
+---
+
+## Sprint 1 — Frontend: Qualidade de código & Bugs críticos
+
+> Refatoração cross-cutting no painel admin. Nenhuma funcionalidade de negócio alterada.
+
+### Bugs corrigidos
+
+**B1 — Rota `/admin/categorias` exibia a tela errada**  
+`App.jsx` importava `AdminNoticias` para a rota `categorias`; `AdminCategorias` não era importado.
+Corrigido com import lazy correto e substituição no JSX da rota.
+
+**B2 — Enum de `status` em `Noticia.js` sem `'revisao'`** *(backend)*  
+O modelo Mongoose não incluía `'revisao'` no array `enum`, apesar de todas as rotas
+(`noticias.js`) e o frontend usarem esse valor. Isso causava falha silenciosa de validação ao
+tentar mover uma notícia para revisão.  
+Corrigido: `enum: ['rascunho', 'revisao', 'publicado', 'arquivado']`
+
+**B3 — `<AdminSEO>` sem `<AdminSuspense>` causava crash no lazy load**  
+Todas as outras rotas admin usavam `<AdminSuspense>`; `AdminSEO` era a única exceção.
+Corrigido com o wrapper apropriado em `App.jsx`.
+
+### Novos arquivos (frontend)
+
+| Arquivo | Descrição |
+|---------|-----------|
+| `src/themes/tokens.js` | Tokens de cor centralizados — CSS vars + fallbacks. Substitui os 5 objetos `const C` duplicados nos componentes admin |
+| `src/components/admin/ui/AdminIcon.jsx` | Biblioteca de 50+ ícones SVG nomeados. Substitui os 5 objetos `const Ico` duplicados |
+| `src/components/admin/ui/ForcaSenha.jsx` | Indicador de força de senha (5 níveis). Unifica as duas implementações divergentes de `AdminSetup` e `AdminUsuarios` |
+| `src/utils/permissions.js` | `GRUPOS_PERMISSOES` em fonte única |
+| `src/styles/base.css` | Extraído de `index.css` — Tailwind + reset |
+| `src/styles/public.css` | Extraído de `index.css` — componentes do site público |
+| `src/styles/admin.css` | Extraído de `index.css` — design system do painel |

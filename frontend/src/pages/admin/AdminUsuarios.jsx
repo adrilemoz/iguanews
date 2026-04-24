@@ -1,64 +1,14 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import { usuariosService } from '../../services/api'
 import toast from 'react-hot-toast'
+import { GRUPOS_PERMISSOES } from '../../utils/permissions'
+import ForcaSenha from '../../components/admin/ui/ForcaSenha'
+import AdminIcon from '../../components/admin/ui/AdminIcon'
+import { useUsuarios } from '../../hooks/useUsuarios'
 
-// Todas as permissões disponíveis agrupadas
-const GRUPOS_PERMISSOES = [
-  { grupo: 'Notícias', perms: [
-    { id: 'noticias.ver',     label: 'Ver notícias' },
-    { id: 'noticias.criar',   label: 'Criar notícias' },
-    { id: 'noticias.editar',  label: 'Editar notícias' },
-    { id: 'noticias.excluir', label: 'Excluir notícias' },
-  ]},
-  { grupo: 'Conteúdo', perms: [
-    { id: 'categorias.gerenciar', label: 'Categorias' },
-    { id: 'fontes.gerenciar',     label: 'Fontes' },
-    { id: 'extras.gerenciar',     label: 'Eventos & Ônibus' },
-    { id: 'modulos.gerenciar',    label: 'Módulos da Home' },
-    { id: 'newsletter.gerenciar', label: 'Newsletter' },
-  ]},
-  { grupo: 'Sistema', perms: [
-    { id: 'configuracoes.gerenciar', label: 'SEO & Configurações' },
-    { id: 'erros.ver',               label: 'Ver Erros/Logs' },
-    { id: 'erros.gerenciar',         label: 'Gerenciar Erros/Logs' },
-    { id: 'backup.gerenciar',        label: 'Backup do banco' },
-    { id: 'usuarios.gerenciar',      label: 'Usuários & Perfis' },
-  ]},
-]
 
-// ── Indicador visual de força de senha ───────────────────────────────────────
-function ForcaSenha({ senha }) {
-  if (!senha) return null
-  let pontos = 0
-  if (senha.length >= 8)             pontos++
-  if (/[a-zA-Z]/.test(senha))        pontos++
-  if (/[0-9]/.test(senha))           pontos++
-  if (/[^a-zA-Z0-9]/.test(senha))    pontos++
-
-  const niveis = [
-    { label: 'Muito fraca', cor: '#ef4444' },
-    { label: 'Fraca',       cor: '#f97316' },
-    { label: 'Média',       cor: '#eab308' },
-    { label: 'Forte',       cor: 'var(--adm-accent)' },
-    { label: 'Muito forte', cor: 'var(--adm-accent-d)' },
-  ]
-  const nivel = niveis[Math.max(0, pontos - 1)]
-
-  return (
-    <div style={{ marginTop: 6 }}>
-      <div style={{ display: 'flex', gap: 3, marginBottom: 3 }}>
-        {[1,2,3,4].map(i => (
-          <div key={i} style={{
-            flex: 1, height: 3, borderRadius: 2,
-            background: i <= pontos ? nivel.cor : 'var(--adm-border)',
-            transition: 'background .2s',
-          }} />
-        ))}
-      </div>
-      <span style={{ fontSize: 10, color: nivel.cor, fontWeight: 600 }}>{nivel.label}</span>
-    </div>
-  )
-}
+// ── Indicador visual de força de senha — agora em components/admin/ui/ForcaSenha
+// ── GRUPOS_PERMISSOES — agora em utils/permissions.js
 
 function Badge({ cor, label }) {
   return (
@@ -69,9 +19,7 @@ function Badge({ cor, label }) {
 }
 
 function IconeOlho({ aberto }) {
-  return aberto
-    ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="15" height="15"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-    : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="15" height="15"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+  return <AdminIcon name={aberto ? 'eye' : 'eyeOff'} size={15} />
 }
 
 // ── Checklist visual das regras de senha ─────────────────────────────────────
@@ -395,67 +343,31 @@ function ModalPerfil({ perfil, onSalvar, onFechar }) {
 }
 
 export default function AdminUsuarios() {
-  const [aba,       setAba]       = useState('usuarios')
-  const [usuarios,  setUsuarios]  = useState([])
-  const [perfis,    setPerfis]    = useState([])
-  const [loading,   setLoading]   = useState(true)
+  const {
+    aba, setAba,
+    perfis, loading,
+    busca, setBusca,
+    usuariosFiltrados,
+    excluirUsuario,
+    excluirPerfil,
+    onSalvarUsuario,
+    onSalvarPerfil,
+    // usuarios — necessário para calcular qtdUsers por perfil
+    usuarios,
+  } = useUsuarios()
+
   const [modalUsr,  setModalUsr]  = useState(null)
   const [modalPrf,  setModalPrf]  = useState(null)
   const [excluindo, setExcluindo] = useState(null)
-  const [busca,     setBusca]     = useState('')
 
-  const carregar = useCallback(async () => {
-    setLoading(true)
-    try {
-      const [u, p] = await Promise.all([usuariosService.listar(), usuariosService.listarPerfis()])
-      setUsuarios(u.usuarios || [])
-      setPerfis(p.perfis || [])
-    } catch (err) { toast.error('Erro ao carregar: ' + err.message) }
-    finally { setLoading(false) }
-  }, [])
-
-  useEffect(() => { carregar() }, [carregar])
-
-  async function excluirUsuario(id) {
-    try {
-      await usuariosService.excluir(id)
-      toast.success('Usuário excluído.')
-      setUsuarios(prev => prev.filter(u => (u.id || u._id) !== id))
-    } catch (err) { toast.error(err.message) }
-    finally { setExcluindo(null) }
+  async function handleExcluir() {
+    if (excluindo.tipo === 'usuario') {
+      await excluirUsuario(excluindo.id)
+    } else {
+      await excluirPerfil(excluindo.id)
+    }
+    setExcluindo(null)
   }
-
-  async function excluirPerfil(id) {
-    try {
-      await usuariosService.excluirPerfil(id)
-      toast.success('Perfil excluído.')
-      setPerfis(prev => prev.filter(p => (p.id || p._id) !== id))
-    } catch (err) { toast.error(err.message) }
-    finally { setExcluindo(null) }
-  }
-
-  function onSalvarUsuario(u) {
-    const id = u.id || u._id
-    setUsuarios(prev => {
-      const idx = prev.findIndex(x => (x.id || x._id) === id)
-      return idx >= 0 ? prev.map((x,i) => i===idx ? u : x) : [u, ...prev]
-    })
-  }
-
-  function onSalvarPerfil(p) {
-    const id = p.id || p._id
-    setPerfis(prev => {
-      const idx = prev.findIndex(x => (x.id || x._id) === id)
-      return idx >= 0 ? prev.map((x,i) => i===idx ? p : x) : [...prev, p]
-    })
-  }
-
-  // Filtro de busca (nome ou email, case-insensitive)
-  const usuariosFiltrados = usuarios.filter(u => {
-    if (!busca.trim()) return true
-    const q = busca.toLowerCase()
-    return u.nome?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q)
-  })
 
   const s = { card: { background:'var(--adm-surface)', border:'1px solid var(--adm-border)', borderRadius:12, padding:20 } }
 
@@ -484,7 +396,7 @@ export default function AdminUsuarios() {
             <p style={{ fontSize:13, color:'var(--adm-muted)', marginBottom:20 }}>Esta ação não pode ser desfeita.</p>
             <div style={{ display:'flex', gap:10, justifyContent:'flex-end' }}>
               <button onClick={() => setExcluindo(null)} className="adm-btn adm-btn-secondary">Cancelar</button>
-              <button onClick={() => excluindo.tipo === 'usuario' ? excluirUsuario(excluindo.id) : excluirPerfil(excluindo.id)}
+              <button onClick={handleExcluir}
                 className="adm-btn adm-btn-danger">Excluir</button>
             </div>
           </div>

@@ -5,65 +5,17 @@ import { useUnsavedChanges } from '../../hooks/useUnsavedChanges'
 import ConfirmModal from '../../components/ConfirmModal'
 
 // ─── Paleta (padrão do admin) ─────────────────────────────────
-const C = {
-  bg:      'var(--adm-bg,      #0f172a)',
-  surface: 'var(--adm-surface, #1e293b)',
-  surf2:   'var(--adm-surface2,#263248)',
-  border:  'var(--adm-border,  #334155)',
-  text:    'var(--adm-text,    #f1f5f9)',
-  muted:   'var(--adm-muted,   #64748b)',
-  subtle:  'var(--adm-subtle,  #94a3b8)',
-  blue:    '#3b82f6',
-  accent:  'var(--adm-accent)',
-  red:     '#ef4444',
-  green:   '#22c55e',
-  yellow:  '#eab308',
-}
+import { T as C } from '../../themes/tokens'
+import AdminIcon from '../../components/admin/ui/AdminIcon'
 
-// ─── Ícones SVG inline ────────────────────────────────────────
+// Alias para compatibilidade com JSX já escrito abaixo
 const Ico = {
-  id: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="15" height="15">
-      <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-      <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>
-    </svg>
-  ),
-  image: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="15" height="15">
-      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-      <circle cx="8.5" cy="8.5" r="1.5"/>
-      <polyline points="21 15 16 10 5 21"/>
-    </svg>
-  ),
-  share: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="15" height="15">
-      <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
-      <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-    </svg>
-  ),
-  chart: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="15" height="15">
-      <line x1="18" y1="20" x2="18" y2="10"/>
-      <line x1="12" y1="20" x2="12" y2="4"/>
-      <line x1="6"  y1="20" x2="6"  y2="14"/>
-    </svg>
-  ),
-  robot: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="15" height="15">
-      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-      <path d="M12 2a3 3 0 000 6"/><path d="M12 8v3"/>
-      <line x1="8" y1="16" x2="8"  y2="16"/>
-      <line x1="16" y1="16" x2="16" y2="16"/>
-    </svg>
-  ),
-  map: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="15" height="15">
-      <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
-      <line x1="8"  y1="2"  x2="8"  y2="18"/>
-      <line x1="16" y1="6"  x2="16" y2="22"/>
-    </svg>
-  ),
+  id:    <AdminIcon name="id"    size={15} />,
+  image: <AdminIcon name="image" size={15} />,
+  share: <AdminIcon name="share" size={15} />,
+  chart: <AdminIcon name="chart" size={15} />,
+  robot: <AdminIcon name="robot" size={15} />,
+  map:   <AdminIcon name="map"   size={15} />,
 }
 
 // ─── Chaves salvas no banco ───────────────────────────────────

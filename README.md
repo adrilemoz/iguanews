@@ -22,11 +22,24 @@ iguanews/
 ├── frontend/         → React + Vite + Tailwind
 │   ├── .env          → VITE_API_URL
 │   └── src/
-│       ├── services/api.js  → cliente HTTP para o backend
+│       ├── services/api.js        → cliente HTTP para o backend
 │       ├── context/AuthContext.jsx
+│       ├── context/ThemeContext.jsx → provedor de tema multi-skin
+│       ├── themes/                → tokens.js + dark/light/ocean/rose
+│       ├── styles/                → base.css · public.css · admin.css
+│       ├── utils/
+│       │   ├── formatters.js
+│       │   ├── markdown.js
+│       │   └── permissions.js     → GRUPOS_PERMISSOES (fonte única)
+│       ├── components/
+│       │   ├── admin/ui/
+│       │   │   ├── AdminIcon.jsx  → biblioteca SVG centralizada (50+ ícones)
+│       │   │   └── ForcaSenha.jsx → indicador de força de senha (5 níveis)
+│       │   └── (ConfirmModal, Navbar, NoticiaCard…)
 │       ├── pages/    → Home, NoticiaDetalhe, Login, Eventos, Ônibus
-│       └── pages/admin/ → Dashboard, NoticiaForm, Categorias, Módulos...
+│       └── pages/admin/ → Dashboard, NoticiaForm, Categorias, Módulos…
 ├── TERMUX.md         → Guia específico para rodar no Android/Termux
+├── CAPACITOR.md      → Build do app Android via Capacitor
 ├── README_MONGO.md   → Guia detalhado de setup e migração
 └── README.md         → Este arquivo
 ```
@@ -166,6 +179,7 @@ npm install && npm run seed && npm run dev
 | Camada | Tecnologia |
 |--------|-----------|
 | Frontend | React 18, Vite, Tailwind CSS, React Router v6 |
+| Design System | tokens.js · AdminIcon · ForcaSenha · multi-tema (dark/light/ocean/rose) |
 | Backend | Node.js 18+, Express 4, ES Modules |
 | Banco de dados | MongoDB Atlas (Mongoose) |
 | Autenticação | JWT (cookie HttpOnly) + bcryptjs |

@@ -10,18 +10,28 @@ import {
   eventosService,
 } from '../../services/api'
 
-const C = {
-  green:  'var(--adm-accent)',
-  blue:   '#3b82f6',
-  amber:  '#f59e0b',
-  red:    'var(--adm-red, #ef4444)',
-  purple: '#8b5cf6',
-  cyan:   '#06b6d4',
-  text:   'var(--adm-text)',
-  muted:  'var(--adm-muted)',
-  border: 'var(--adm-border)',
-  surface:'var(--adm-surface)',
-  surf2:  'var(--adm-surface2)',
+import { T as C } from '../../themes/tokens'
+import AdminIcon from '../../components/admin/ui/AdminIcon'
+
+// Alias para compatibilidade com JSX já escrito abaixo
+const Ico = {
+  news:    <AdminIcon name="news"    size={18} />,
+  draft:   <AdminIcon name="draft"   size={18} />,
+  review:  <AdminIcon name="review"  size={18} />,
+  archive: <AdminIcon name="archive" size={18} />,
+  alert:   <AdminIcon name="alert"   size={18} />,
+  mail:    <AdminIcon name="mail"    size={18} />,
+  db:      <AdminIcon name="db"      size={16} />,
+  cloud:   <AdminIcon name="cloudUp" size={16} />,
+  seo:     <AdminIcon name="seo"     size={16} />,
+  cat:     <AdminIcon name="cat"     size={16} />,
+  plus:    <AdminIcon name="plus"    size={14} />,
+  layers:  <AdminIcon name="layers"  size={16} />,
+  bus:     <AdminIcon name="bus"     size={16} />,
+  cal:     <AdminIcon name="cal"     size={16} />,
+  chart:   <AdminIcon name="chart"   size={16} />,
+  ext:     <AdminIcon name="extLink" size={13} />,
+  server:  <AdminIcon name="server"  size={16} />,
 }
 
 function fmt(n) { return (n ?? 0).toLocaleString('pt-BR') }
@@ -41,27 +51,7 @@ function Dot({ color }) {
   return <span style={{ display:'inline-block', width:8, height:8, borderRadius:'50%', background:color, flexShrink:0, boxShadow:`0 0 6px ${color}88` }} />
 }
 function Spin() {
-  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14" style={{ animation:'dash-spin .8s linear infinite' }}><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeOpacity=".2"/><path d="M21 12a9 9 0 00-9-9"/></svg>
-}
-
-const Ico = {
-  news:    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
-  draft:   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
-  review:  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,
-  archive: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>,
-  alert:   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
-  mail:    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>,
-  db:      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>,
-  cloud:   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>,
-  seo:     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>,
-  cat:     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M7 7h.01M7 3h5l7.586 7.586a2 2 0 010 2.828L14 19a2 2 0 01-2.828 0L3.586 11.414A2 2 0 013 10V5a2 2 0 012-2z"/></svg>,
-  plus:    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>,
-  layers:  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>,
-  bus:     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M8 19v2M16 19v2"/></svg>,
-  cal:     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
-  chart:   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>,
-  ext:     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="13" height="13"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>,
-  server:  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>,
+  return <AdminIcon name="spinSm" size={14} />
 }
 
 function StatCard({ icon, label, value, sub, accent, loading }) {

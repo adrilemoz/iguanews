@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Calendar, Plus, Trash2, Edit2, Save, X, Clock, MapPin, ChevronLeft, ChevronRight, Tag } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { eventosService } from '../../services/api'
 import ConfirmModal from '../../components/ConfirmModal'
+import { useEventos } from '../../hooks/useEventos'
 
 const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
                'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
@@ -394,38 +394,17 @@ function EventoItem({ ev, onEdit, onDelete }) {
 
 // ─── Página principal ───────────────────────────────────────────
 export default function AdminEventos() {
-  const [eventos, setEventos] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [editando, setEditando] = useState(null)   // null | 'novo' | id
+  const { loading, eventosDatas, futuros, passados, salvarEvento, excluirEvento } = useEventos()
+
+  const [editando,   setEditando]   = useState(null)   // null | 'novo' | id
   const [editEvento, setEditEvento] = useState(null)
-  const [confirm, setConfirm] = useState({ aberto: false, id: null, carregando: false })
-
-  async function carregar() {
-    try {
-      setLoading(true)
-      const data = await eventosService.listarTodos()
-      setEventos(data)
-    } catch {
-      toast.error('Erro ao carregar eventos')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => { carregar() }, [])
+  const [confirm,    setConfirm]    = useState({ aberto: false, id: null, carregando: false })
 
   async function salvar(form) {
     try {
-      if (editando === 'novo') {
-        await eventosService.criar(form)
-        toast.success('Evento criado!')
-      } else {
-        await eventosService.editar(editando, form)
-        toast.success('Evento atualizado!')
-      }
+      await salvarEvento(editando, form)
       setEditando(null)
       setEditEvento(null)
-      carregar()
     } catch (err) {
       toast.error(err.message)
     }
@@ -434,22 +413,13 @@ export default function AdminEventos() {
   async function confirmarExclusao() {
     setConfirm(c => ({ ...c, carregando: true }))
     try {
-      await eventosService.excluir(confirm.id)
-      toast.success('Evento excluído')
+      await excluirEvento(confirm.id)
       setConfirm({ aberto: false, id: null, carregando: false })
-      carregar()
     } catch {
       toast.error('Erro ao excluir')
       setConfirm(c => ({ ...c, carregando: false }))
     }
   }
-
-  const eventosDatas = eventos.map(e => new Date(e.data).toISOString().split('T')[0])
-
-  const hoje = new Date()
-  hoje.setHours(0, 0, 0, 0)
-  const futuros  = eventos.filter(e => new Date(e.data) >= hoje).sort((a, b) => new Date(a.data) - new Date(b.data))
-  const passados = eventos.filter(e => new Date(e.data) < hoje).sort((a, b) => new Date(b.data) - new Date(a.data))
 
   // Quando editando !== null, exibir APENAS o formulário (sem a lista)
   // para evitar o bug de duas telas simultâneas

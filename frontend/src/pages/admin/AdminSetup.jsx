@@ -13,24 +13,14 @@ import { setupService }        from '../../services/api'
 import toast                   from 'react-hot-toast'
 
 /* ─── Tokens visuais ──────────────────────────────────────────── */
-const C = {
-  pageBg:    '#0f172a',
-  surface:   '#1e293b',
-  elevated:  '#263248',
-  border:    '#334155',
-  borderFoc: '#3b82f6',
-  text:      '#f1f5f9',
-  muted:     '#64748b',
-  subtle:    '#94a3b8',
-  green:     '#166534',
-  greenHov:  '#15803d',
-  greenAcc:  '#4ade80',
-  blue:      '#3b82f6',
-  orange:    '#f97316',
-  red:       '#dc2626',
-  redDim:    '#7f1d1d',
-  yellow:    '#ca8a04',
-}
+import { T as C } from '../../themes/tokens'
+import AdminIcon from '../../components/admin/ui/AdminIcon'
+import ForcaSenha from '../../components/admin/ui/ForcaSenha'
+
+// C.green em AdminSetup é verde escuro (botão primário), não o acento do tema
+const _C = { ...C, green: C.greenDk }
+// Redefine C localmente para preservar o comportamento visual
+Object.assign(C, _C)
 
 const wrap = {
   minHeight: '100vh', background: C.pageBg,
@@ -80,33 +70,24 @@ const secTitle = {
 
 /* ─── Ícones ──────────────────────────────────────────────────── */
 const Ico = {
-  shield:  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" width="24" height="24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
-  check:   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="38" height="38"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
-  arrow:   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="14" height="14"><path d="M5 12h14M12 5l7 7-7 7"/></svg>,
-  info:    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>,
-  warn:    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
-  db:      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>,
-  seed:    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><path d="M12 22V12"/><path d="M5 12c0-4.4 3.1-8 7-8s7 3.6 7 8"/><path d="M5 12s4-2 7 2 7-2 7-2"/></svg>,
-  trash:   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>,
-  refresh: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>,
-  eye:     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="15" height="15"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,
-  eyeOff:  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="15" height="15"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>,
-  gear:    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>,
-  chev:    (up) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="13" height="13" style={{ transform: up ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }}><polyline points="6 9 12 15 18 9"/></svg>,
-  save:    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>,
+  shield:  <AdminIcon name="shield"  size={24} />,
+  check:   <AdminIcon name="checkLg" size={38} />,
+  arrow:   <AdminIcon name="arrow"   size={14} />,
+  info:    <AdminIcon name="info"    size={14} />,
+  warn:    <AdminIcon name="warn"    size={14} />,
+  db:      <AdminIcon name="db"      size={14} />,
+  seed:    <AdminIcon name="seed"    size={14} />,
+  trash:   <AdminIcon name="trash"   size={14} />,
+  refresh: <AdminIcon name="refresh" size={14} />,
+  eye:     <AdminIcon name="eye"     size={15} />,
+  eyeOff:  <AdminIcon name="eyeOff"  size={15} />,
+  gear:    <AdminIcon name="gear"    size={14} />,
+  chev:    (up) => <AdminIcon name={up ? 'chevUp' : 'chevDown'} size={13} style={{ transition: 'transform .2s' }} />,
+  save:    <AdminIcon name="save"    size={14} />,
 }
 
 function Spin({ size = 14 }) {
-  return (
-    <>
-      <style>{`@keyframes _spin{to{transform:rotate(360deg)}}`}</style>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
-        width={size} height={size}
-        style={{ animation: '_spin .65s linear infinite' }}>
-        <path d="M21 12a9 9 0 11-18 0"/>
-      </svg>
-    </>
-  )
+  return <AdminIcon name="spinSm" size={size} />
 }
 
 /* ─── Regras de senha ─────────────────────────────────────────── */
@@ -174,40 +155,6 @@ function CampoAcessoFixo() {
     </div>
   )
 }
-function calcForca(senha) {
-  if (!senha) return { nivel: 0, texto: '', cor: C.border }
-  let pts = 0
-  if (senha.length >= 8)  pts++
-  if (senha.length >= 12) pts++
-  if (/[A-Z]/.test(senha))  pts++
-  if (/[0-9]/.test(senha))  pts++
-  if (/[^A-Za-z0-9]/.test(senha)) pts++
-  if (pts <= 1) return { nivel: 1, texto: 'Muito fraca',  cor: C.red }
-  if (pts === 2) return { nivel: 2, texto: 'Fraca',       cor: C.orange }
-  if (pts === 3) return { nivel: 3, texto: 'Média',       cor: C.yellow }
-  if (pts === 4) return { nivel: 4, texto: 'Forte',       cor: C.greenAcc }
-  return              { nivel: 5, texto: 'Muito forte',  cor: C.blue }
-}
-
-function BarraForca({ senha }) {
-  const { nivel, texto, cor } = calcForca(senha)
-  if (!senha) return null
-  return (
-    <div style={{ marginTop: 6 }}>
-      <div style={{ display: 'flex', gap: 3, marginBottom: 4 }}>
-        {[1,2,3,4,5].map(i => (
-          <div key={i} style={{
-            flex: 1, height: 3, borderRadius: 99,
-            background: i <= nivel ? cor : C.border,
-            transition: 'background .2s',
-          }}/>
-        ))}
-      </div>
-      <span style={{ fontSize: 10, color: cor, fontWeight: 600 }}>{texto}</span>
-    </div>
-  )
-}
-
 /* ─── Campo de formulário com toggle de senha ────────────────── */
 function Campo({ label: lbl, type = 'text', placeholder, value, onChange, erro, autoComplete, mostrarForca }) {
   const [foc,    setFoc]    = useState(false)
@@ -241,7 +188,7 @@ function Campo({ label: lbl, type = 'text', placeholder, value, onChange, erro, 
         )}
       </div>
       {erro && <p style={errMsg}>{erro}</p>}
-      {eSenha && mostrarForca && <BarraForca senha={value} />}
+      {eSenha && mostrarForca && <ForcaSenha senha={value} />}
     </div>
   )
 }

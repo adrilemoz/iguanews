@@ -11,9 +11,10 @@
  *  - Configurar auto-atualização periódica por fonte
  *  - Ver histórico de última importação e total importado
  */
-import { useState, useEffect, useCallback } from 'react'
+import { useState } from 'react'
 import { rssService, categoriasService } from '../../services/api'
 import toast from 'react-hot-toast'
+import { useRss } from '../../hooks/useRss'
 
 // ─── Helpers de formatação ────────────────────────────────────────────────────
 
@@ -454,106 +455,24 @@ function PainelResultados({ resultados, onFechar }) {
 // ─── Componente principal ─────────────────────────────────────────────────────
 
 export default function AdminRssImport() {
-  const [fontes,      setFontes]      = useState([])
-  const [padrao,      setPadrao]      = useState([])
-  const [categorias,  setCategorias]  = useState([])
-  const [carregando,  setCarregando]  = useState(true)
-  const [modal,       setModal]       = useState(null)   // null | fonte | 'novo'
-  const [importando,  setImportando]  = useState(null)   // id da fonte sendo importada
-  const [importandoTodas, setImportandoTodas] = useState(false)
-  const [adicionando, setAdicionando] = useState(null)   // url sendo adicionada como padrão
-  const [resultados,  setResultados]  = useState(null)   // último resultado
+  const {
+    fontes, padrao, categorias,
+    carregando, importando, importandoTodas, adicionando, resultados,
+    setResultados, temFontesAtivas,
+    adicionarPadrao, salvarFonte, excluirFonte, importarFonte, importarTodas,
+  } = useRss()
 
-  const carregar = useCallback(async () => {
-    setCarregando(true)
-    try {
-      const [fs, ps, cs] = await Promise.all([
-        rssService.listarFontes(),
-        rssService.fontesPadrao(),
-        categoriasService.listar(),
-      ])
-      setFontes(Array.isArray(fs) ? fs : fs.fontes ?? [])
-      setPadrao(Array.isArray(ps) ? ps : [])
-      setCategorias(Array.isArray(cs) ? cs : cs.categorias ?? [])
-    } catch (err) {
-      toast.error('Erro ao carregar fontes RSS: ' + err.message)
-    } finally { setCarregando(false) }
-  }, [])
+  const [modal, setModal] = useState(null) // null | {} | fonte
 
-  useEffect(() => { carregar() }, [carregar])
-
-  // Adicionar fonte padrão
-  async function handleAdicionarPadrao(p) {
-    setAdicionando(p.url)
-    try {
-      await rssService.criarFonte({ nome: p.nome, url: p.url, padrao: true })
-      toast.success(`"${p.nome}" adicionada!`)
-      await carregar()
-    } catch (err) {
-      toast.error(err.message || 'Erro ao adicionar fonte')
-    } finally { setAdicionando(null) }
-  }
-
-  // Salvar (criar ou editar)
   async function handleSalvar(dados) {
     try {
-      if (modal?.id) {
-        await rssService.editarFonte(modal.id, dados)
-        toast.success('Fonte atualizada!')
-      } else {
-        await rssService.criarFonte(dados)
-        toast.success('Fonte cadastrada!')
-      }
+      await salvarFonte(dados, modal?.id)
       setModal(null)
-      await carregar()
     } catch (err) {
       toast.error(err.message || 'Erro ao salvar fonte')
       throw err // re-lança para o modal não fechar em caso de erro
     }
   }
-
-  // Excluir fonte
-  async function handleExcluir(fonte) {
-    try {
-      await rssService.excluirFonte(fonte.id)
-      toast.success('Fonte removida')
-      await carregar()
-    } catch (err) {
-      toast.error(err.message || 'Erro ao excluir')
-    }
-  }
-
-  // Importar uma fonte
-  async function handleImportar(fonte) {
-    setImportando(fonte.id)
-    setResultados(null)
-    try {
-      // Passa categoria_id para que o backend categorize as notícias importadas
-      const categoriaId = fonte.categoria_id?.id || fonte.categoria_id || null
-      const r = await rssService.importarFonte(fonte.id, { categoria_id: categoriaId })
-      setResultados(r)
-      toast.success(`${r.importadas} notícia(s) importada(s)`)
-      await carregar()
-    } catch (err) {
-      toast.error('Erro na importação: ' + err.message)
-    } finally { setImportando(null) }
-  }
-
-  // Importar todas
-  async function handleImportarTodas() {
-    setImportandoTodas(true)
-    setResultados(null)
-    try {
-      const r = await rssService.importarTodas()
-      setResultados(r)
-      toast.success(`${r.totalImportadas} notícia(s) importada(s) no total`)
-      await carregar()
-    } catch (err) {
-      toast.error('Erro na importação em massa: ' + err.message)
-    } finally { setImportandoTodas(false) }
-  }
-
-  const temFontesAtivas = fontes.some(f => f.ativa)
 
   return (
     <div style={{ maxWidth:860, margin:'0 auto' }}>
@@ -567,7 +486,7 @@ export default function AdminRssImport() {
           </div>
         </div>
         <div style={{ display:'flex', gap:10 }}>
-          <button onClick={handleImportarTodas}
+          <button onClick={importarTodas}
             disabled={importandoTodas || !temFontesAtivas || !!importando}
             className="adm-btn adm-btn-secondary adm-btn-sm">
             {importandoTodas
@@ -614,7 +533,7 @@ export default function AdminRssImport() {
         <PainelFontesPadrao
           padrao={padrao}
           existentes={fontes}
-          onAdicionar={handleAdicionarPadrao}
+          onAdicionar={adicionarPadrao}
           adicionando={adicionando}
         />
       )}
@@ -649,9 +568,9 @@ export default function AdminRssImport() {
               <CardFonte
                 key={fonte.id}
                 fonte={fonte}
-                onImportar={handleImportar}
+                onImportar={importarFonte}
                 onEditar={setModal}
-                onExcluir={handleExcluir}
+                onExcluir={excluirFonte}
                 importando={importando}
               />
             ))}

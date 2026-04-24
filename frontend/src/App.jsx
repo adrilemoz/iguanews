@@ -23,6 +23,7 @@ const AdminLayout       = lazy(() => import('./pages/admin/AdminLayout'))
 const AdminDashboard    = lazy(() => import('./pages/admin/AdminDashboard'))
 const AdminNoticiaForm  = lazy(() => import('./pages/admin/AdminNoticiaForm'))
 const AdminNoticias     = lazy(() => import('./pages/admin/AdminNoticias'))
+const AdminCategorias   = lazy(() => import('./pages/admin/AdminCategorias'))  // B1
 const AdminModulos      = lazy(() => import('./pages/admin/AdminModulos'))
 const AdminOnibus       = lazy(() => import('./pages/admin/AdminOnibus'))
 const AdminEventos      = lazy(() => import('./pages/admin/AdminEventos'))
@@ -75,12 +76,12 @@ export default function App() {
           <Route path="nova-noticia" element={<AdminSuspense><AdminNoticiaForm /></AdminSuspense>} />
           <Route path="editar/:id" element={<AdminSuspense><AdminNoticiaForm /></AdminSuspense>} />
           <Route path="noticias"    element={<AdminSuspense><AdminNoticias /></AdminSuspense>} />
-          <Route path="categorias"  element={<AdminSuspense><AdminNoticias /></AdminSuspense>} />
+          <Route path="categorias"  element={<AdminSuspense><AdminCategorias /></AdminSuspense>} />
           <Route path="modulos" element={<AdminSuspense><AdminModulos /></AdminSuspense>} />
           <Route path="onibus" element={<AdminSuspense><AdminOnibus /></AdminSuspense>} />
           <Route path="eventos" element={<AdminSuspense><AdminEventos /></AdminSuspense>} />
           <Route path="newsletter" element={<AdminSuspense><AdminNewsletter /></AdminSuspense>} />
-          <Route path="seo" element={<AdminSEO />} />
+          <Route path="seo" element={<AdminSuspense><AdminSEO /></AdminSuspense>} />
           <Route path="erros"    element={<AdminSuspense><AdminErros /></AdminSuspense>} />
           <Route path="usuarios" element={<AdminSuspense><AdminUsuarios /></AdminSuspense>} />
           <Route path="backup"   element={<AdminSuspense><AdminBackup /></AdminSuspense>} />
