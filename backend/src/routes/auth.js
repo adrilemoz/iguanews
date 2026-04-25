@@ -19,11 +19,17 @@ const loginLimiter = rateLimit({
   message: { erro: 'Muitas tentativas de login. Tente novamente em 15 minutos.' },
 })
 
+// Cross-origin = frontend e backend em domínios diferentes (produção real).
+// Detectamos pela FRONTEND_URL: se não for localhost/127.0.0.1, usamos
+// SameSite=None + Secure — independente do NODE_ENV.
+// Isso evita a desconexão imediata causada por SameSite=Lax em fetch cross-origin.
+const crossOrigin = !/localhost|127\.0\.0\.1/.test(process.env.FRONTEND_URL || '')
+
 const COOKIE_OPTS = {
-  httpOnly: true,                                       // #1 — protege contra XSS
-  secure: process.env.NODE_ENV === 'production',        // HTTPS em produção
-  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-  maxAge: 7 * 24 * 60 * 60 * 1000,                     // 7 dias (ms)
+  httpOnly: true,
+  secure: crossOrigin,
+  sameSite: crossOrigin ? 'none' : 'lax',
+  maxAge: 7 * 24 * 60 * 60 * 1000,  // 7 dias (ms)
   path: '/',
 }
 

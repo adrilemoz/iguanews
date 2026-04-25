@@ -10,6 +10,7 @@
  */
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { arquivosService } from '../../services/api'
+import { markdownParaHtml } from '../../utils/markdown'
 import toast from 'react-hot-toast'
 
 // ─── Constantes ───────────────────────────────────────────────
@@ -295,7 +296,16 @@ export default function AdminArquivos() {
                 {arquivo.label}
               </span>
               <LangBadge linguagem={arquivo.linguagem} />
-              {modificado && (
+              {arquivo.linguagem === 'markdown' && (
+                <span style={{
+                  fontSize: 10, fontWeight: 600, color: 'var(--adm-muted)',
+                  background: 'var(--adm-surface2)', borderRadius: 4, padding: '2px 7px',
+                  border: '1px solid var(--adm-border)', letterSpacing: .2,
+                }}>
+                  👁 somente leitura
+                </span>
+              )}
+              {arquivo.linguagem !== 'markdown' && modificado && (
                 <span style={{
                   fontSize: 10, fontWeight: 700, color: '#f59e0b',
                   background: 'rgba(245,158,11,.12)', borderRadius: 4, padding: '2px 6px',
@@ -314,21 +324,25 @@ export default function AdminArquivos() {
                   : <><IconCopy /> <span className="adm-only-desktop">Copiar</span></>
                 }
               </button>
-              {modificado && (
-                <button onClick={handleDescartar} className="adm-btn adm-btn-secondary adm-btn-sm"
-                  style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                  <IconUndo />
-                  <span className="adm-only-desktop">Descartar</span>
-                </button>
+              {arquivo.linguagem !== 'markdown' && (
+                <>
+                  {modificado && (
+                    <button onClick={handleDescartar} className="adm-btn adm-btn-secondary adm-btn-sm"
+                      style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <IconUndo />
+                      <span className="adm-only-desktop">Descartar</span>
+                    </button>
+                  )}
+                  <button onClick={handleSalvar} disabled={salvando || !modificado}
+                    className="adm-btn adm-btn-primary adm-btn-sm"
+                    style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    {salvando
+                      ? <><IconSpin small /> Salvando...</>
+                      : <><IconSave /> Salvar</>
+                    }
+                  </button>
+                </>
               )}
-              <button onClick={handleSalvar} disabled={salvando || !modificado}
-                className="adm-btn adm-btn-primary adm-btn-sm"
-                style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                {salvando
-                  ? <><IconSpin small /> Salvando...</>
-                  : <><IconSave /> Salvar</>
-                }
-              </button>
             </div>
           </>
         )}
@@ -384,55 +398,99 @@ export default function AdminArquivos() {
               </div>
             )}
 
-            {/* Editor */}
+            {/* Editor ou Preview */}
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '10px 16px 16px', overflow: 'hidden' }}>
-              <textarea
-                ref={textareaRef}
-                value={conteudo}
-                onChange={e => setConteudo(e.target.value)}
-                onKeyDown={handleKeyDown}
-                spellCheck={false}
-                placeholder={`# Conteúdo de ${arquivo?.label ?? 'arquivo'}`}
-                style={{
-                  flex: 1,
-                  width: '100%',
-                  resize: 'none',
-                  fontFamily: '"Cascadia Code", "Fira Code", "Source Code Pro", Consolas, monospace',
-                  fontSize: 12.5,
-                  lineHeight: 1.7,
-                  padding: '12px 14px',
-                  borderRadius: 8,
-                  border: '1px solid var(--adm-border)',
-                  background: 'var(--adm-bg, var(--adm-surface))',
-                  color: 'var(--adm-text)',
-                  outline: 'none',
-                  transition: 'border-color .15s',
-                  minHeight: 200,
-                }}
-                onFocus={e => { e.currentTarget.style.borderColor = 'var(--adm-accent)' }}
-                onBlur={e => { e.currentTarget.style.borderColor = 'var(--adm-border)' }}
-              />
-
-              {/* Barra de status */}
-              <div style={{
-                display: 'flex', gap: 12, alignItems: 'center',
-                padding: '6px 2px 0', flexWrap: 'wrap',
-              }}>
-                <span style={{ fontSize: 11, color: 'var(--adm-muted)' }}>
-                  {fmtLinhas(conteudo)}
-                </span>
-                <span style={{ fontSize: 11, color: 'var(--adm-muted)' }}>
-                  {conteudo.length} caracteres
-                </span>
-                {arquivo.tamanho > 0 && (
-                  <span style={{ fontSize: 11, color: 'var(--adm-muted)' }}>
-                    {fmtBytes(arquivo.tamanho)} no disco
-                  </span>
-                )}
-                <span style={{ fontSize: 11, color: 'var(--adm-muted)', marginLeft: 'auto' }}>
-                  Tab = 2 espaços · Ctrl+S salva
-                </span>
-              </div>
+              {arquivo.linguagem === 'markdown' ? (
+                <>
+                  {/* Visualização read-only estilo GitHub */}
+                  <div
+                    className="prose-news"
+                    dangerouslySetInnerHTML={{ __html: markdownParaHtml(conteudo) }}
+                    style={{
+                      flex: 1,
+                      overflowY: 'auto',
+                      padding: '20px 24px',
+                      borderRadius: 8,
+                      border: '1px solid var(--adm-border)',
+                      background: 'var(--adm-bg, var(--adm-surface))',
+                      color: 'var(--adm-text)',
+                      lineHeight: 1.8,
+                      fontSize: 14,
+                      minHeight: 200,
+                    }}
+                  />
+                  {/* Barra de status read-only */}
+                  <div style={{
+                    display: 'flex', gap: 12, alignItems: 'center',
+                    padding: '6px 2px 0', flexWrap: 'wrap',
+                  }}>
+                    <span style={{ fontSize: 11, color: 'var(--adm-muted)' }}>
+                      {fmtLinhas(conteudo)}
+                    </span>
+                    <span style={{ fontSize: 11, color: 'var(--adm-muted)' }}>
+                      {conteudo.length} caracteres
+                    </span>
+                    {arquivo.tamanho > 0 && (
+                      <span style={{ fontSize: 11, color: 'var(--adm-muted)' }}>
+                        {fmtBytes(arquivo.tamanho)} no disco
+                      </span>
+                    )}
+                    <span style={{ fontSize: 11, color: 'var(--adm-muted)', marginLeft: 'auto' }}>
+                      Arquivo de documentação — somente leitura
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Editor de texto para .env, YAML, TS, etc. */}
+                  <textarea
+                    ref={textareaRef}
+                    value={conteudo}
+                    onChange={e => setConteudo(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    spellCheck={false}
+                    placeholder={`# Conteúdo de ${arquivo?.label ?? 'arquivo'}`}
+                    style={{
+                      flex: 1,
+                      width: '100%',
+                      resize: 'none',
+                      fontFamily: '"Cascadia Code", "Fira Code", "Source Code Pro", Consolas, monospace',
+                      fontSize: 12.5,
+                      lineHeight: 1.7,
+                      padding: '12px 14px',
+                      borderRadius: 8,
+                      border: '1px solid var(--adm-border)',
+                      background: 'var(--adm-bg, var(--adm-surface))',
+                      color: 'var(--adm-text)',
+                      outline: 'none',
+                      transition: 'border-color .15s',
+                      minHeight: 200,
+                    }}
+                    onFocus={e => { e.currentTarget.style.borderColor = 'var(--adm-accent)' }}
+                    onBlur={e => { e.currentTarget.style.borderColor = 'var(--adm-border)' }}
+                  />
+                  {/* Barra de status */}
+                  <div style={{
+                    display: 'flex', gap: 12, alignItems: 'center',
+                    padding: '6px 2px 0', flexWrap: 'wrap',
+                  }}>
+                    <span style={{ fontSize: 11, color: 'var(--adm-muted)' }}>
+                      {fmtLinhas(conteudo)}
+                    </span>
+                    <span style={{ fontSize: 11, color: 'var(--adm-muted)' }}>
+                      {conteudo.length} caracteres
+                    </span>
+                    {arquivo.tamanho > 0 && (
+                      <span style={{ fontSize: 11, color: 'var(--adm-muted)' }}>
+                        {fmtBytes(arquivo.tamanho)} no disco
+                      </span>
+                    )}
+                    <span style={{ fontSize: 11, color: 'var(--adm-muted)', marginLeft: 'auto' }}>
+                      Tab = 2 espaços · Ctrl+S salva
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
           </>
         )}

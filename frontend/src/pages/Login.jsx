@@ -53,17 +53,21 @@ export default function Login() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="label" htmlFor="email">Email</label>
-              <input id="email" type="email" className="input"
+              <input id="email" type="email"
+                className={`input transition-opacity${loading ? ' opacity-50 pointer-events-none' : ''}`}
                 placeholder="admin@iguanews.com" value={email}
-                onChange={e => setEmail(e.target.value)} disabled={loading} />
+                onChange={e => setEmail(e.target.value)}
+                readOnly={loading} />
             </div>
 
             <div>
               <label className="label" htmlFor="senha">Senha</label>
               <div className="relative">
                 <input id="senha" type={mostrarSenha ? 'text' : 'password'}
-                  className="input pr-10" placeholder="••••••••" value={senha}
-                  onChange={e => setSenha(e.target.value)} disabled={loading} />
+                  className={`input pr-10 transition-opacity${loading ? ' opacity-50 pointer-events-none' : ''}`}
+                  placeholder="••••••••" value={senha}
+                  onChange={e => setSenha(e.target.value)}
+                  readOnly={loading} />
                 <button type="button" onClick={() => setMostrar(v => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                   {mostrarSenha ? <EyeOff size={16} /> : <Eye size={16} />}

@@ -105,8 +105,24 @@ app.use(compression({
 }))
 
 // ─── CORS ────────────────────────────────────────────────────
+// FRONTEND_URL aceita lista separada por vírgula para cobrir múltiplos domínios.
+// Ex.: FRONTEND_URL=https://iguanews.com.br,https://www.iguanews.com.br
+const allowedOrigins = new Set([
+  'http://localhost:5173',
+  'http://localhost:4173',
+  ...(process.env.FRONTEND_URL || '')
+    .split(',')
+    .map(o => o.trim())
+    .filter(Boolean),
+])
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    // Sem origin: Postman, curl ou testes — permitido
+    if (!origin) return callback(null, true)
+    if (allowedOrigins.has(origin)) return callback(null, true)
+    callback(new Error(`CORS: origem não permitida — ${origin}`))
+  },
   credentials: true,
 }))
 
