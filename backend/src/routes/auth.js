@@ -22,7 +22,7 @@ const loginLimiter = rateLimit({
 const COOKIE_OPTS = {
   httpOnly: true,                                       // #1 — protege contra XSS
   secure: process.env.NODE_ENV === 'production',        // HTTPS em produção
-  sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
   maxAge: 7 * 24 * 60 * 60 * 1000,                     // 7 dias (ms)
   path: '/',
 }
