@@ -6,10 +6,10 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   server: {
     androidScheme: 'https',
-    // Em produção, aponte para sua URL pública para o app carregar ao vivo.
-    // Descomente a linha abaixo e coloque o domínio real:
-    // url: 'https://iguanews.com.br',
-    // cleartext: false,
+    // App carrega o site ao vivo — atualizações no Vercel refletem
+    // automaticamente no app sem precisar gerar novo APK.
+    url: 'https://iguanews.vercel.app',
+    cleartext: false,
   },
   android: {
     buildOptions: {

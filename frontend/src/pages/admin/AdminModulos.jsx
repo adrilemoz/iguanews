@@ -22,6 +22,15 @@ const MODULO_LABELS = {
   ultimas_noticias: 'Últimas Notícias',
   noticias_externas: 'Notícias do Brasil e do Mundo',
   destaques: 'Destaques',
+  'horario-onibus': 'Horário de Ônibus',
+  eventos: 'Agenda de Eventos',
+  'historia-cidade': 'História da Cidade',
+  'belezas-naturais': 'Belezas Naturais',
+}
+
+const MODULO_DESC = {
+  'horario-onibus': 'Exibe o próximo horário de ônibus na faixa de tópicos da home',
+  eventos: 'Exibe o próximo evento na faixa de tópicos da home',
 }
 
 // ─── Seção: Configurações do Hero ────────────────────────────
@@ -450,7 +459,9 @@ function SecaoModulos({ modulos, onToggle }) {
               }} />
               <div>
                 <p style={{ fontWeight: 600, color: 'var(--adm-text)', marginBottom: 2 }}>{MODULO_LABELS[m.chave] || m.titulo}</p>
-                <p style={{ fontSize: 11, color: 'var(--adm-muted)' }}>Ordem: {m.ordem}</p>
+                <p style={{ fontSize: 11, color: 'var(--adm-muted)' }}>
+                  {MODULO_DESC[m.chave] || `Ordem: ${m.ordem}`}
+                </p>
               </div>
             </div>
             <button

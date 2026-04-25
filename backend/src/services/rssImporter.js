@@ -1,5 +1,5 @@
 /**
- * rssImporter.js  — v2.1 (corrigido)
+ * rssImporter.js  — v2.2
  * ─────────────────────────────────────
  * Serviço central de importação de notícias via RSS.
  *
@@ -9,6 +9,14 @@
  *  2. importarTodasFontes: respeita auto_update e intervalo_min por fonte,
  *     comportamento antes feito pelo rssScheduler.js (agora descontinuado).
  *  3. Erros de fetch remoto são distinguidos de erros de configuração local.
+ *
+ * CORREÇÕES v2.2:
+ *  4. fetchFeedXmlFallback: remove BOM UTF-8 (\uFEFF) e whitespace antes do XML.
+ *     Corrige "Non-whitespace before first tag. Line: 0, Column: 1" em feeds de
+ *     servidores Windows/IIS e geradores PHP legados.
+ *  5. parseFeed fallback: em vez de re-lançar o erro original, agora tenta
+ *     parser.parseString(xml) com o XML já limpo do BOM, permitindo importar
+ *     feeds que o rss-parser recusava por esse motivo.
  *
  * Estratégia de deduplicação:
  *   ┌─────────────────────────────────────────────────────────────────┐
@@ -164,8 +172,13 @@ async function fetchFeedXmlFallback(url) {
     throw new Error(detail)
   }
 
-  const text = await res.text()
-  if (!text.trim().startsWith('<')) {
+  // FIX v2.2: Remove BOM UTF-8 (\uFEFF) e qualquer whitespace antes do primeiro '<'.
+  // Isso resolve "Non-whitespace before first tag" — feeds que emitem BOM ou espaços
+  // antes do prólogo XML, algo comum em servidores Windows/IIS e geradores PHP legados.
+  let text = await res.text()
+  text = text.replace(/^\uFEFF/, '').trimStart()
+
+  if (!text.startsWith('<')) {
     throw new Error('Resposta do feed não é um XML válido — verifique se a URL é um feed RSS ou Atom')
   }
   return text
@@ -215,17 +228,29 @@ export async function parseFeed(url) {
       throw new Error(`Não foi possível conectar ao feed: ${msg}`)
     }
 
-    // Tentativa 2 (fallback): fetch nativo com User-Agent de navegador.
-    // Útil para feeds que bloqueiam bots mas aceitam navegadores.
-    logger.warn({ url, err: msg }, '⚠️  rss-parser falhou — tentando fallback com fetch nativo')
+    // Tentativa 2 (fallback): fetch nativo com User-Agent de navegador + stripagem de BOM.
+    // FIX v2.2: Antes apenas validava o acesso HTTP e re-lançava o erro original.
+    // Agora busca o XML, remove o BOM/whitespace e tenta parseString() diretamente.
+    // Isso corrige feeds com BOM UTF-8 ou espaços antes do prólogo XML que causam
+    // "Non-whitespace before first tag. Line: 0, Column: 1".
+    logger.warn({ url, err: msg }, '⚠️  rss-parser falhou — tentando fallback com fetch nativo + BOM strip')
     try {
-      await fetchFeedXmlFallback(url)  // valida acesso HTTP
-      // Se chegou aqui, o URL é acessível mas o XML pode não ser parseable via rss-parser.
-      // Re-lança o erro original com contexto adicional.
-      throw new Error(`Feed acessível mas não pôde ser interpretado: ${msg}. Verifique se é RSS 2.0 ou Atom.`)
+      const xml = await fetchFeedXmlFallback(url)  // já remove BOM e valida que começa com '<'
+
+      // Tenta parsear o XML limpo diretamente (sem re-fetch pelo rss-parser)
+      try {
+        const feedFallback = await parser.parseString(xml)
+        logger.info({ url }, '✅ Fallback com parseString bem-sucedido após remoção de BOM')
+        return feedFallback.items ?? []
+      } catch (parseErr) {
+        // XML acessível mas estruturalmente inválido para RSS/Atom
+        throw new Error(
+          `Feed acessível, mas não pôde ser interpretado: ${parseErr.message}. Verifique se é RSS.`
+        )
+      }
     } catch (errFallback) {
-      // Fallback também falhou — usa a mensagem mais informativa
-      const finalMsg = errFallback.message.includes('Feed')
+      // Fallback de fetch também falhou (HTTP error, sem conectividade, XML inválido)
+      const finalMsg = errFallback.message.startsWith('Feed')
         ? errFallback.message
         : `Falha ao importar feed: ${errPrimario.message}`
       throw new Error(finalMsg)

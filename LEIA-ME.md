@@ -148,3 +148,57 @@ instalação (banco / seed / reset / env)
 ### 🗑️ Arquivos removidos
 
 `backend/src/routes/rssImport.js` — marcado como `⚠️ ARQUIVO DEPRECADO` desde a criação, nunca montado em `server.js`, com todas as suas funcionalidades já migradas para `rssAdmin.js` e `services/rssImporter.js`.
+
+---
+
+## Sprint 4 — Arquivos grandes
+
+**Foco:** fragmentar os 3 maiores arquivos do projeto em unidades menores e coesas.
+
+### `services/api.js` — 428 → 28 linhas
+
+| Novo arquivo | Conteúdo |
+|---|---|
+| `services/domains/http.js` | Cliente `fetch` base com tratamento de 401, cookies e parse de erros |
+| `services/domains/auth.js` | `authService` |
+| `services/domains/noticias.js` | `noticiasService` |
+| `services/domains/categorias.js` | `categoriasService` |
+| `services/domains/fontes.js` | `fontesService` |
+| `services/domains/configuracoes.js` | `configuracoesService` |
+| `services/domains/modulos.js` | `modulosService` |
+| `services/domains/noticiasExternas.js` | `noticiasExternasService` |
+| `services/domains/topicos.js` | `topicosService` |
+| `services/domains/onibus.js` | `onibusService` |
+| `services/domains/eventos.js` | `eventosService` |
+| `services/domains/storage.js` | `storageService` |
+| `services/domains/newsletter.js` | `newsletterService` |
+| `services/domains/erros.js` | `errosService` |
+| `services/domains/setup.js` | `setupService` |
+| `services/domains/usuarios.js` | `usuariosService` |
+| `services/domains/backup.js` | `backupService` |
+| `services/domains/infraestrutura.js` | `infraestruturaService` |
+| `services/domains/rss.js` | `rssService` |
+
+`api.js` foi reescrito como barrel de re-exports — todos os imports existentes continuam funcionando sem alteração.
+
+### `AdminSetup.jsx` — 1117 → 456 linhas
+
+| Novo arquivo | Conteúdo extraído |
+|---|---|
+| `components/admin/setup/SetupForms.jsx` | Todos os primitivos de UI: `Campo`, `Check`, `StatusBadge`, `CampoAcessoFixo`, `RegrasSenha`, `SeletorDados`, `OPCOES_SEED`, tokens de estilo |
+| `components/admin/setup/ConfigMongo.jsx` | Painel expansível de configuração da URI do MongoDB |
+| `components/admin/setup/ConfigCloudinary.jsx` | Painel expansível de configuração das credenciais do Cloudinary |
+
+`AdminSetup.jsx` ficou com apenas as 4 telas de fluxo: `TelaVerificando`, `TelaInstalacao`, `TelaSucesso`, `PainelBanco`.
+
+### `AdminInfraestrutura.jsx` — 1049 → 66 linhas
+
+| Novo arquivo | Conteúdo extraído |
+|---|---|
+| `components/admin/infra/InfraBase.jsx` | Primitivos compartilhados: `PageCard`, `SectionTitle`, `Badge`, `Btn`, `Input`, `StatusDot`, `BarraProgresso`, `ModalConfirm`, `formatBytes`, `Ico`, `Spin` |
+| `components/admin/infra/AbaConfiguracoes.jsx` | Aba de credenciais MongoDB e Cloudinary |
+| `components/admin/infra/AbaMongoDB.jsx` | Aba de exploração do banco (coleções, documentos, índices) |
+| `components/admin/infra/AbaCloudinary.jsx` | Aba de galeria de mídia e métricas |
+| `components/admin/infra/AbaSistema.jsx` | Aba de CPU, memória e limpeza de cache |
+
+`AdminInfraestrutura.jsx` ficou com apenas o roteador de abas + `Suspense`/`lazy` para cada aba.

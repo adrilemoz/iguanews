@@ -5,12 +5,23 @@ Stack: **React + Vite + Tailwind** (frontend) · **Node.js + Express + MongoDB +
 
 ---
 
+## 🌐 URLs de produção
+
+| Serviço   | URL                                          |
+|-----------|----------------------------------------------|
+| Frontend  | https://iguanews.vercel.app                  |
+| Backend   | https://iguanews-backend.onrender.com        |
+| API       | https://iguanews-backend.onrender.com/api    |
+| APK       | GitHub → Actions → Artifacts                 |
+
+---
+
 ## Estrutura do projeto
 
 ```
 iguanews/
 ├── backend/          → Servidor Node.js (Express + MongoDB + Cloudinary)
-│   ├── .env          → Credenciais (já preenchidas)
+│   ├── .env          → Credenciais (não commitar)
 │   ├── seed.js       → Cria admin e dados iniciais
 │   └── src/
 │       ├── server.js
@@ -20,7 +31,8 @@ iguanews/
 │       ├── middleware/ → auth JWT, upload Cloudinary, audit log...
 │       └── utils/    → cache Redis, logger pino
 ├── frontend/         → React + Vite + Tailwind
-│   ├── .env          → VITE_API_URL
+│   ├── .env          → VITE_API_URL (aponta para o Render)
+│   ├── capacitor.config.ts → Config do app Android
 │   └── src/
 │       ├── services/api.js        → cliente HTTP para o backend
 │       ├── context/AuthContext.jsx
@@ -46,7 +58,7 @@ iguanews/
 
 ---
 
-## 🚀 Rodando local
+## 🚀 Rodando local (desenvolvimento)
 
 ### Pré-requisitos
 
@@ -59,18 +71,18 @@ iguanews/
 ```bash
 cd backend
 npm install
-npm run seed   # Popula banco com admin + categorias padrão
-npm run dev    # Servidor em http://localhost:3001
+cp .env.example .env   # preencha com suas credenciais locais
+npm run seed           # popula banco com admin + categorias padrão
+npm run dev            # servidor em http://localhost:3001
 ```
-
-O arquivo `backend/.env` já vem preenchido. Confirme que está correto antes de rodar.
 
 ### 2. Frontend
 
 ```bash
 cd frontend
+# Para dev local, edite .env e troque VITE_API_URL por http://localhost:3001/api
 npm install
-npm run dev    # App em http://localhost:5173
+npm run dev    # app em http://localhost:5173
 ```
 
 ### Credenciais padrão do admin
@@ -78,133 +90,44 @@ npm run dev    # App em http://localhost:5173
 - **Email:** admin@iguanews.com
 - **Senha:** admin123
 
-> ⚠️ Troque a senha após o primeiro login em produção!
+---
+
+## ☁️ Deploy em produção
+
+### Backend — Render
+
+Variáveis de ambiente configuradas no Render:
+
+| Variável               | Valor                                       |
+|------------------------|---------------------------------------------|
+| `NODE_ENV`             | `production`                                |
+| `MONGO_URI`            | string de conexão do MongoDB Atlas          |
+| `JWT_SECRET`           | chave secreta longa (mín. 16 caracteres)    |
+| `JWT_EXPIRES_IN`       | `7d`                                        |
+| `CLOUDINARY_CLOUD_NAME`| cloud name do Cloudinary                    |
+| `CLOUDINARY_API_KEY`   | API key do Cloudinary                       |
+| `CLOUDINARY_API_SECRET`| API secret do Cloudinary                   |
+| `REDIS_URL`            | URL interna do Key Value do Render          |
+| `FRONTEND_URL`         | `https://iguanews.vercel.app`               |
+
+### Frontend — Vercel
+
+Variável de ambiente configurada no Vercel:
+
+| Variável       | Valor                                        |
+|----------------|----------------------------------------------|
+| `VITE_API_URL` | `https://iguanews-backend.onrender.com/api`  |
+
+### APK Android
+
+Consulte o [CAPACITOR.md](./CAPACITOR.md) para instruções completas.  
+O APK debug é gerado automaticamente pelo GitHub Actions a cada push na `main`.
 
 ---
 
-## 📱 Rodando no Termux (Android)
+## ⚠️ Plano gratuito do Render
 
-Veja o guia completo em [`TERMUX.md`](./TERMUX.md), incluindo a solução para o erro
-`"Variáveis de ambiente inválidas"` que aparece no Termux.
-
-```bash
-pkg install nodejs git
-git clone https://github.com/SEU_USUARIO/iguanews.git
-cd iguanews/backend
-npm install && npm run seed && npm run dev
-```
-
----
-
-## 🌐 Deploy em produção
-
-### Backend (Railway, Render, VPS...)
-
-1. Suba a pasta `backend/`
-2. Configure as variáveis de ambiente no painel do host:
-   - `MONGO_URI`
-   - `JWT_SECRET` — gere com `openssl rand -hex 32`
-   - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`
-   - `FRONTEND_URL=https://seu-site.com` (CORS)
-3. Execute `npm run seed` uma vez para criar o admin
-4. Execute `npm start`
-
-### Frontend (Vercel, Netlify...)
-
-1. Suba a pasta `frontend/`
-2. Configure: `VITE_API_URL=https://seu-backend.com/api`
-3. Build command: `npm run build`
-4. Publish directory: `dist`
-
-> ⚠️ No GitHub Actions (CI), configure o secret `VITE_API_URL` no repositório
-> (Settings → Secrets → Actions).
-
----
-
-## 📡 Rotas da API
-
-### Públicas
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| GET | /api/noticias | Lista notícias (paginação, filtros, busca) |
-| GET | /api/noticias/:id | Notícia por ID (incrementa views) |
-| GET | /api/categorias | Lista categorias |
-| GET | /api/fontes | Lista fontes |
-| GET | /api/configuracoes | Configurações da home |
-| GET | /api/modulos | Módulos da home |
-| GET | /api/topicos | Tópicos ativos |
-| GET | /api/eventos | Eventos (paginação por cursor) |
-| GET | /api/onibus | Linhas de ônibus |
-| GET | /api/health | Status dos serviços (MongoDB, Redis, Cloudinary) |
-| GET | /sitemap.xml | Sitemap dinâmico |
-| GET | /rss | Feed RSS |
-| GET | /api/docs | Swagger UI |
-
-### Autenticadas (requer cookie JWT)
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| POST | /api/auth/login | Login → define cookie HttpOnly |
-| POST | /api/auth/logout | Logout → limpa cookie |
-| GET | /api/auth/me | Dados do usuário logado |
-| POST/PUT/DELETE | /api/noticias | CRUD de notícias |
-| POST | /api/upload | Upload de imagem → Cloudinary |
-| ... | (categorias, fontes, módulos, eventos, ônibus, etc.) | CRUD completo |
-
----
-
-## 🛠️ Variáveis de ambiente
-
-### backend/.env
-| Variável | Obrigatório | Descrição |
-|----------|-------------|-----------|
-| `MONGO_URI` | ✅ | String de conexão MongoDB Atlas |
-| `JWT_SECRET` | ✅ | Segredo para tokens JWT (mín. 16 chars) |
-| `CLOUDINARY_CLOUD_NAME` | ✅ | Cloud name do Cloudinary |
-| `CLOUDINARY_API_KEY` | ✅ | API Key do Cloudinary |
-| `CLOUDINARY_API_SECRET` | ✅ | API Secret do Cloudinary |
-| `PORT` | — | Porta do servidor (padrão: 3001) |
-| `JWT_EXPIRES_IN` | — | Validade do token (padrão: 7d) |
-| `REDIS_URL` | — | URL do Redis (padrão: localhost:6379) |
-| `FRONTEND_URL` | — | URL do frontend para CORS (padrão: localhost:5173) |
-
-### frontend/.env
-| Variável | Descrição |
-|----------|-----------|
-| `VITE_API_URL` | URL do backend (padrão: http://localhost:3001/api) |
-
----
-
-## 📦 Stack completa
-
-| Camada | Tecnologia |
-|--------|-----------|
-| Frontend | React 18, Vite, Tailwind CSS, React Router v6 |
-| Design System | tokens.js · AdminIcon · ForcaSenha · multi-tema (dark/light/ocean/rose) |
-| Backend | Node.js 18+, Express 4, ES Modules |
-| Banco de dados | MongoDB Atlas (Mongoose) |
-| Autenticação | JWT (cookie HttpOnly) + bcryptjs |
-| Upload de imagens | Cloudinary via Multer |
-| Cache | Redis (ioredis) com fallback em memória |
-| Logs | Pino + pino-http |
-| Métricas | Prometheus (prom-client) em /metrics |
-| Documentação API | Swagger UI em /api/docs |
-| Validação env | Zod |
-| Migrações | migrate-mongo |
-| Testes | Jest + Supertest |
-| CI | GitHub Actions |
-
----
-
-## 🗄️ Backup do banco de dados
-
-O painel admin (`/admin/backup`) oferece gerenciamento completo de backups:
-
-| Operação | Como funciona |
-|---|---|
-| **Criar** | Exporta todas as coleções para `backend/backups/backup_<timestamp>.json` |
-| **Importar** | Envia um arquivo `.json` (exportado anteriormente) de volta ao servidor |
-| **Download** | Baixa o arquivo JSON do backup para o computador local |
-| **Restaurar** | Apaga os dados atuais e reinserere os dados do backup |
-| **Excluir** | Remove os arquivos `.json` e `.manifest.json` do servidor |
-
-> **Dica:** Combine "Download" com "Importar" para mover backups entre ambientes (ex.: produção → staging).
+No plano gratuito o serviço "adormece" após 15 minutos sem uso.
+A primeira requisição após o sono pode demorar 30–60 segundos.
+Para manter sempre ativo, use o [UptimeRobot](https://uptimerobot.com)
+configurado para pingar `https://iguanews-backend.onrender.com/api/health` a cada 14 minutos.

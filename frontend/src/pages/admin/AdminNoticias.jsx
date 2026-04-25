@@ -227,7 +227,7 @@ function AbaCategorias() {
         )}
         {!loading&&categorias.length>0&&(
           <>
-            <div className="adm-table-scroll">
+            <div className="not-table-wrap adm-table-scroll">
               <table className="adm-table" aria-label="Lista de categorias">
                 <thead><tr><th>Nome</th><th>Slug</th><th>Descrição SEO</th><th style={{width:1}}></th></tr></thead>
                 <tbody>
@@ -370,7 +370,7 @@ function AbaFontes() {
         )}
         {!loading&&fontes.length>0&&(
           <>
-            <div className="adm-table-scroll">
+            <div className="not-table-wrap adm-table-scroll">
               <table className="adm-table" aria-label="Lista de fontes">
                 <thead><tr><th>Nome</th><th>URL</th><th style={{width:1}}></th></tr></thead>
                 <tbody>

@@ -79,26 +79,63 @@ function Hero({ cfg }) {
   )
 }
 
-// ─── Faixa de tópicos ──────────────────────────────────────────
-function FaixaTopicos({ topicos }) {
+// ─── Faixa de tópicos ──────────────────────────────────────────────
+function labelOnibus(t) {
+  // Exibe só "Ônibus" — a etiqueta completa "Horário de Ônibus" quebra o grid
+  return t.icone === 'bus' ? 'Ônibus' : t.label
+}
+
+function textoEventoDias(dataISO) {
+  if (!dataISO) return null
+  const evento = new Date(dataISO); evento.setHours(0,0,0,0)
+  const hoje   = new Date();        hoje.setHours(0,0,0,0)
+  const dias   = Math.round((evento - hoje) / 86_400_000)
+  if (dias === 0) return '📅 Hoje!'
+  if (dias === 1) return '📅 Amanhã'
+  return `📅 Em ${dias} dias`
+}
+
+function FaixaTopicos({ topicos, proximoEvento, proximoOnibus, modulos }) {
   if (!topicos.length) return null
+
+  const onibusMod  = modulos?.['horario-onibus']?.ativo !== false
+  const eventosMod = modulos?.['eventos']?.ativo !== false
+
   return (
     <div className="wrap">
       <div className="-mt-8 relative z-20 bg-white rounded-2xl shadow-lg border border-gray-100 px-4 py-5">
         <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${topicos.length}, 1fr)` }}>
           {topicos.map(t => {
-            const Icon = ICON_MAP[t.icone] || Heart
+            const Icon      = ICON_MAP[t.icone] || Heart
             const isInterno = t.link?.startsWith('/')
+            const isOnibus  = t.icone === 'bus'
+            const isEventos = ['calendarDays', 'calendar'].includes(t.icone)
+
+            // Linha de detalhe dinâmico ou descrição estática
+            let detalhe = null
+            if (isOnibus && onibusMod) {
+              detalhe = proximoOnibus
+                ? <p className="text-blue-600 text-[10px] font-semibold leading-snug">🚌 {proximoOnibus}</p>
+                : <p className="text-gray-400 text-[10px] leading-snug">{t.descricao}</p>
+            } else if (isEventos && eventosMod) {
+              const txt = textoEventoDias(proximoEvento)
+              detalhe = txt
+                ? <p className="text-forest-600 text-[10px] font-semibold leading-snug">{txt}</p>
+                : <p className="text-gray-400 text-[10px] leading-snug">{t.descricao}</p>
+            } else if (t.descricao) {
+              detalhe = <p className="text-gray-500 text-[10px] leading-snug">{t.descricao}</p>
+            }
+
             const inner = (
               <>
                 <div className="w-12 h-12 rounded-2xl bg-forest-50 flex items-center justify-center
                                 group-hover:bg-forest-100 transition-colors">
                   <Icon size={22} className="text-forest-600" strokeWidth={1.5}/>
                 </div>
-                <p className="font-extrabold text-xs text-gray-900 leading-tight">{t.label}</p>
-                {t.descricao && (
-                  <p className="text-gray-500 text-[10px] leading-snug hidden sm:block">{t.descricao}</p>
-                )}
+                <p className="font-extrabold text-xs text-gray-900 leading-tight">
+                  {labelOnibus(t)}
+                </p>
+                {detalhe}
               </>
             )
             return isInterno ? (
@@ -110,76 +147,6 @@ function FaixaTopicos({ topicos }) {
             )
           })}
         </div>
-      </div>
-    </div>
-  )
-}
-
-// ─── Seção de Serviços (Ônibus + Eventos) ──────────────────────
-function SecaoServicos({ modulos, proximoEvento, proximoOnibus }) {
-  const temEventos = modulos['eventos']?.ativo !== false
-  const temOnibus  = modulos['onibus']?.ativo  !== false
-
-  if (!temEventos && !temOnibus) return null
-
-  const cols = [temEventos, temOnibus].filter(Boolean).length
-
-  return (
-    <div className="wrap">
-      <div className="mt-4 grid gap-3"
-        style={{ gridTemplateColumns: cols === 1 ? '1fr' : '1fr 1fr' }}>
-
-        {/* Card Eventos */}
-        {temEventos && (
-          <Link to="/eventos"
-            className="group bg-white rounded-2xl border border-gray-100 shadow-sm
-                       hover:shadow-md hover:border-forest-200 transition-all duration-200
-                       overflow-hidden flex flex-col">
-            <div className="h-1.5 bg-gradient-to-r from-forest-600 to-forest-400" />
-            <div className="p-4 flex items-center gap-3 flex-1">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-forest-50 flex items-center
-                              justify-center flex-shrink-0 group-hover:bg-forest-100 transition-colors">
-                <CalendarDays size={20} className="text-forest-600" strokeWidth={1.5} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-extrabold text-gray-900 text-sm leading-tight">Agenda de Eventos</p>
-                {proximoEvento ? (
-                  <p className="text-xs text-gray-500 mt-0.5 truncate font-semibold">📅 {proximoEvento}</p>
-                ) : (
-                  <p className="text-xs text-gray-400 mt-0.5">Iguatama e região</p>
-                )}
-              </div>
-              <ArrowRight size={16} className="text-gray-300 group-hover:text-forest-500 flex-shrink-0
-                                               group-hover:translate-x-0.5 transition-all" />
-            </div>
-          </Link>
-        )}
-
-        {/* Card Ônibus */}
-        {temOnibus && (
-          <Link to="/onibus"
-            className="group bg-white rounded-2xl border border-gray-100 shadow-sm
-                       hover:shadow-md hover:border-blue-200 transition-all duration-200
-                       overflow-hidden flex flex-col">
-            <div className="h-1.5 bg-gradient-to-r from-blue-600 to-sky-400" />
-            <div className="p-4 flex items-center gap-3 flex-1">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-blue-50 flex items-center
-                              justify-center flex-shrink-0 group-hover:bg-blue-100 transition-colors">
-                <Bus size={20} className="text-blue-600" strokeWidth={1.5} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-extrabold text-gray-900 text-sm leading-tight">Horário de Ônibus</p>
-                {proximoOnibus ? (
-                  <p className="text-xs text-gray-500 mt-0.5 font-semibold">🚌 Próximo às {proximoOnibus}</p>
-                ) : (
-                  <p className="text-xs text-gray-400 mt-0.5">Ver partidas e horários</p>
-                )}
-              </div>
-              <ArrowRight size={16} className="text-gray-300 group-hover:text-blue-500 flex-shrink-0
-                                               group-hover:translate-x-0.5 transition-all" />
-            </div>
-          </Link>
-        )}
       </div>
     </div>
   )
@@ -303,17 +270,13 @@ export default function Home() {
     topicosService.listar().then(setTopicos).catch(() => {})
     noticiasExternasService.listar().then(setExternas).catch(() => {})
 
-    // Preview: proximo evento futuro
+    // Preview: próximo evento — guarda a data ISO para calcular dias restantes
     eventosService.listar().then(evs => {
       const hoje = new Date(); hoje.setHours(0,0,0,0)
       const proximo = evs
         .filter(e => new Date(e.data) >= hoje)
         .sort((a, b) => new Date(a.data) - new Date(b.data))[0]
-      if (proximo) {
-        const d = new Date(proximo.data)
-        const label = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })
-        setProximoEvento(proximo.titulo + " · " + label)
-      }
+      if (proximo) setProximoEvento(proximo.data)
     }).catch(() => {})
 
     // Preview: proximo onibus do dia (primeira linha ativa)
@@ -363,12 +326,12 @@ export default function Home() {
   return (
     <div>
       {!emFiltro && isAtivo('hero')    && <Hero cfg={cfg} />}
-      {!emFiltro && isAtivo('topicos') && <FaixaTopicos topicos={topicos} />}
-      {!emFiltro && (
-        <SecaoServicos
-          modulos={modulos}
+      {!emFiltro && isAtivo('topicos') && (
+        <FaixaTopicos
+          topicos={topicos}
           proximoEvento={proximoEvento}
           proximoOnibus={proximoOnibus}
+          modulos={modulos}
         />
       )}
 

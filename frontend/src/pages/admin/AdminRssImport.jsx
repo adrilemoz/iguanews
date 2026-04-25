@@ -521,7 +521,7 @@ export default function AdminRssImport() {
         <div style={{ fontSize:12.5, color:'var(--adm-text)', lineHeight:1.6 }}>
           Notícias importadas são salvas como <strong>rascunho</strong> e incluem automaticamente a fonte.
           Revise e publique cada uma pelo menu <strong>Notícias → Todas as Notícias</strong>.
-          A deduplicação por título evita importar a mesma notícia duas vezes.
+          A deduplicação por GUID evita importar a mesma notícia duas vezes, mesmo que o título mude.
         </div>
       </div>
 
