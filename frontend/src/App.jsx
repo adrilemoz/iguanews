@@ -39,6 +39,8 @@ const AdminInfraestrutura = lazy(() => import('./pages/admin/AdminInfraestrutura
 const AdminTemas = lazy(() => import('./pages/admin/AdminTemas'))
 // Importação RSS
 const AdminRssImport = lazy(() => import('./pages/admin/AdminRssImport'))
+// Editor de arquivos de configuração
+const AdminArquivos = lazy(() => import('./pages/admin/AdminArquivos'))
 
 function AdminSuspense({ children }) {
   return (
@@ -91,6 +93,7 @@ export default function App() {
           <Route path="temas" element={<AdminSuspense><AdminTemas /></AdminSuspense>} />
           {/* Importação via RSS */}
           <Route path="rss-import" element={<AdminSuspense><AdminRssImport /></AdminSuspense>} />
+          <Route path="arquivos" element={<AdminSuspense><AdminArquivos /></AdminSuspense>} />
         </Route>
 
         {/* Setup — sem autenticação, redireciona se já instalado */}

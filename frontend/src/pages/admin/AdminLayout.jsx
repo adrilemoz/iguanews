@@ -33,11 +33,12 @@ const NAV = [
   {
     group: true, label: 'Sistema', icon: IconServer, perm: 'configuracoes.gerenciar',
     children: [
-      { to: '/admin/seo',            label: 'SEO',            icon: IconSearch,  perm: 'configuracoes.gerenciar' },
-      { to: '/admin/infraestrutura', label: 'Infraestrutura', icon: IconInfra,   perm: 'configuracoes.gerenciar' },
-      { to: '/admin/backup',         label: 'Backup',         icon: IconBackup,  perm: 'backup.gerenciar'        },
-      { to: '/admin/temas',          label: 'Temas',          icon: IconPalette, perm: null                      },
-      { to: '/admin/erros',          label: 'Erros',          icon: IconAlerta,  perm: 'erros.ver'               },
+      { to: '/admin/seo',            label: 'SEO',              icon: IconSearch,    perm: 'configuracoes.gerenciar' },
+      { to: '/admin/infraestrutura', label: 'Infraestrutura',   icon: IconInfra,     perm: 'configuracoes.gerenciar' },
+      { to: '/admin/arquivos',       label: 'Arquivos',         icon: IconFileEdit,  perm: 'configuracoes.gerenciar' },
+      { to: '/admin/backup',         label: 'Backup',           icon: IconBackup,    perm: 'backup.gerenciar'        },
+      { to: '/admin/temas',          label: 'Temas',            icon: IconPalette,   perm: null                      },
+      { to: '/admin/erros',          label: 'Erros',            icon: IconAlerta,    perm: 'erros.ver'               },
     ],
   },
 ]
@@ -553,3 +554,4 @@ function IconInfra()   { return <svg viewBox="0 0 24 24" fill="none" stroke="cur
 function IconServer()  { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" style={{width:'100%',height:'100%'}}><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg> }
 function IconPalette() { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" style={{width:'100%',height:'100%'}}><circle cx="12" cy="12" r="10"/><circle cx="8.5" cy="9" r="1.5" fill="currentColor" stroke="none"/><circle cx="15.5" cy="9" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="15" r="1.5" fill="currentColor" stroke="none"/><path d="M5.5 14.5c2.5 3 11 3 13 0"/></svg> }
 function IconRss()     { return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" style={{width:'100%',height:'100%'}}><path d="M4 11a9 9 0 019 9M4 4a16 16 0 0116 16"/><circle cx="5" cy="19" r="1" fill="currentColor" stroke="none"/></svg> }
+function IconFileEdit(){ return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" style={{width:'100%',height:'100%'}}><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg> }

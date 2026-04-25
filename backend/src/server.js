@@ -65,6 +65,7 @@ import backupRoutes     from './routes/backup.js'
 import usuariosRoutes   from './routes/usuarios.js'
 import infraestruturaRoutes from './routes/infraestrutura.js'
 import rssAdminRoutes   from './routes/rssAdmin.js'              // #RSS
+import arquivosRoutes   from './routes/arquivos.js'             // Editor de arquivos de config
 import { tratarErros }  from './middleware/erros.js'
 
 const app  = express()
@@ -133,6 +134,7 @@ app.use('/api/admin/backup',   backupRoutes)
 app.use('/api/admin/usuarios', usuariosRoutes)
 app.use('/api/admin/infraestrutura', infraestruturaRoutes)
 app.use('/api/admin/rss',      rssAdminRoutes)               // #RSS
+app.use('/api/admin/arquivos', arquivosRoutes)               // Editor de arquivos de config
 
 // ─── #9 — Health check detalhado ─────────────────────────────
 app.use('/api/health', healthRoutes)
