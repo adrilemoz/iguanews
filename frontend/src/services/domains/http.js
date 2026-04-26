@@ -2,7 +2,7 @@
  * http.js — Cliente HTTP base compartilhado por todos os módulos de serviço.
  * Gerencia cookies HttpOnly, redirecionamento 401 e parse de erros.
  */
-export const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
+export const BASE_URL = import.meta.env.VITE_API_URL || 'https://iguanews-production.up.railway.app/api'
 
 export async function api(path, options = {}) {
   const headers = { 'Content-Type': 'application/json', ...options.headers }
